@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using TaskManager.Lib;
 
@@ -11,39 +12,60 @@ namespace TaskManager.Util
     {
         static void Main(string[] args)
         {
-            //var task = new Task(() => { });
-            //Console.WriteLine(task.Status);
-            //var queue = new Queue<int>();
-            //queue.
-
-            var userTask = new UserTaskBase();
-
-            for (int i = 1; i <= 100; i++)
-            {
-                var strNum = i.ToString();
-                userTask.Stop += (sender, e) =>
-                {
-                    Console.WriteLine($"{strNum} Stop event handler result: {e.Obj.ToString()}");
-                };
-            }
-
-            for (int i = 1; i <= 100; i++)
-            {
-                var strNum = i.ToString();
-                userTask.Start += (sender, e) =>
-                {
-                    Console.WriteLine($"{strNum} Start event handler result: {e.Obj.ToString()}");
-                };
-            }
            
+            var taskManager = new TaskManagerImpl();
 
-            Console.ReadKey();
 
-            userTask.DoWork();
+            var highTask1 = new UserTaskBase("High priority Task1", PriorityEnum.High, (object obj) =>
+            {
+                Console.WriteLine(obj as string);
+                Thread.Sleep(2000);
+            });
+
+            var highTask2 = new UserTaskBase("Very High priority Task2", PriorityEnum.VeryHigh, (object obj) =>
+            {
+                Console.WriteLine(obj as string);
+                Thread.Sleep(2000);
+            });
+
+            var lowTask = new UserTaskBase("Low priority Task", PriorityEnum.Low, (object obj) =>
+            {
+                Console.WriteLine(obj as string);
+                Thread.Sleep(2000);
+            });
+
+            taskManager.AddTask(highTask1);
+            taskManager.AddTask(lowTask);
+            taskManager.AddTask(highTask2);
+
+            taskManager.StartTasksAsync();
+
+            highTask2 = new UserTaskBase("Very High priority Task1", PriorityEnum.VeryHigh, (object obj) =>
+            {
+                Console.WriteLine(obj as string);
+                Thread.Sleep(2000);
+            });
+
+            taskManager.AddTask(highTask2);
 
             Console.WriteLine("Press Enter to continue...");
             Console.ReadLine();
         }
 
+        private static void RunTaskWithException()
+        {
+            var task = Task.Run(() => throw new Exception("HEllo world"));
+            try
+            {
+
+
+                task.Wait();
+
+            }
+            catch (AggregateException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
     }
 }
