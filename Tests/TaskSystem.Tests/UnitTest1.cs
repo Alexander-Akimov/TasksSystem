@@ -20,7 +20,7 @@ namespace TaskSystem.Tests
             //var task = new Task(r);
             ITaskManager taskManager = new TaskManagerImpl();
 
-            var task = new UserTaskBase("Main Task", TaskPriority.High, r);
+            var task = new UserTaskBase("Main Task", TaskPriorityUtil.High, r);
             taskManager.AddTask(task);
 
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TaskManager.Lib
@@ -10,41 +11,47 @@ namespace TaskManager.Lib
     {
         private List<UserTaskBase> _taskList = new List<UserTaskBase>();
 
+        private bool running = true;
+
         public void AddTask(UserTaskBase task)
         {
             _taskList.Add(task);
-        }       
+        }
 
         public async void StartTasksAsync()
         {
             await Task.Factory.StartNew(() =>
             {
-                var waitingTasks = _taskList.Where(task => task.Status == TaskStatus.Waiting).ToList();
-
-                if (waitingTasks.Count == 0) return;
-
-                foreach (var task in TaskPriority.Values)
+                while (running == true)
                 {
-                    var taskToRun = waitingTasks.FirstOrDefault(wt => wt.Priority == task);
-                    if (taskToRun == null) continue;
+                    var waitingTasks = _taskList.Where(task => task.Status == TaskStatus.Waiting).ToList();
+                    if (waitingTasks.Count == 0) continue;
 
-                    taskToRun.Stop += this.HandleTaskStop;
-                    taskToRun?.Run();
-                    return;
-                }
+                    var runningTasks = _taskList.Where(task => task.Status == TaskStatus.Running).ToList();
+                    if (runningTasks.Count > 0) continue;
+
+                    foreach (var taskPriority in TaskPriorityUtil.Values)
+                    {
+                        var taskToRun = waitingTasks.FirstOrDefault(wt => wt.Priority == taskPriority);
+                        if (taskToRun == null) continue;
+                        taskToRun?.Run();
+                        break;                        
+                    }
+                    Thread.Sleep(1000);
+                }                
             });
         }
         private void HandleTaskStop(Object obj, TaskStoppedEventArgs e)
         {
-            StartTasksAsync ();
+            StartTasksAsync();
             var task = obj as UserTaskBase;
             if (task != null)
                 task.Stop -= this.HandleTaskStop;
         }
         public void StopAllTasks()
         {
-            var waitingTasks = _taskList.Where(task => task.Status == TaskStatus.Running).ToList();
-
+            //var waitingTasks = _taskList.Where(task => task.Status == TaskStatus.Running).ToList();
+            running = false;
         }
 
         public List<UserTaskBase> GetTasks()
@@ -55,6 +62,6 @@ namespace TaskManager.Lib
         public void StartTask(UserTaskBase task)
         {
             throw new NotImplementedException();
-        }        
+        }
     }
 }

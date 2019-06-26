@@ -14,21 +14,30 @@ namespace TaskManager.Util
         {
            
             var taskManager = new TaskManagerImpl();
+            taskManager.StartTasksAsync();
 
 
-            var highTask1 = new UserTaskBase("High priority Task1", PriorityEnum.High, (object obj) =>
+            var highTask1 = new UserTaskBase("High priority Task1", TaskPriorities.High, (object obj) =>
             {
                 Console.WriteLine(obj as string);
                 Thread.Sleep(2000);
             });
+            highTask1.Start += (sender, e) =>
+            {
+                Console.WriteLine($"Start event handler result: {e.Obj.ToString()}");
+            };
 
-            var highTask2 = new UserTaskBase("Very High priority Task2", PriorityEnum.VeryHigh, (object obj) =>
+            var highTask2 = new UserTaskBase("Very High priority Task2", TaskPriorities.VeryHigh, (object obj) =>
             {
                 Console.WriteLine(obj as string);
                 Thread.Sleep(2000);
             });
+            highTask2.Stop += (sender, e) =>
+            {
+                Console.WriteLine($"Stop event handler result: {e.Obj.ToString()}");
+            };
 
-            var lowTask = new UserTaskBase("Low priority Task", PriorityEnum.Low, (object obj) =>
+            var lowTask = new UserTaskBase("Low priority Task", TaskPriorities.Low, (object obj) =>
             {
                 Console.WriteLine(obj as string);
                 Thread.Sleep(2000);
@@ -38,9 +47,9 @@ namespace TaskManager.Util
             taskManager.AddTask(lowTask);
             taskManager.AddTask(highTask2);
 
-            taskManager.StartTasksAsync();
+           
 
-            highTask2 = new UserTaskBase("Very High priority Task1", PriorityEnum.VeryHigh, (object obj) =>
+            highTask2 = new UserTaskBase("Very High priority Task1", TaskPriorities.VeryHigh, (object obj) =>
             {
                 Console.WriteLine(obj as string);
                 Thread.Sleep(2000);
@@ -50,22 +59,6 @@ namespace TaskManager.Util
 
             Console.WriteLine("Press Enter to continue...");
             Console.ReadLine();
-        }
-
-        private static void RunTaskWithException()
-        {
-            var task = Task.Run(() => throw new Exception("HEllo world"));
-            try
-            {
-
-
-                task.Wait();
-
-            }
-            catch (AggregateException ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
+        }       
     }
 }

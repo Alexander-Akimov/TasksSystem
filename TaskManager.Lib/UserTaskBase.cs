@@ -12,7 +12,7 @@ namespace TaskManager.Lib
 
         public Guid TaskId { get; }
         public string TaskName { get; }
-        public PriorityEnum Priority { get; }
+        public TaskPriorities Priority { get; }
         public TaskStatus Status { get; private set; }        
 
         // public event EventHandler<TaskCreatedEventArgs> Create;
@@ -20,7 +20,7 @@ namespace TaskManager.Lib
         public event EventHandler<TaskStoppedEventArgs> Stop;
         public event EventHandler<TaskErrorEventArgs> Error;
 
-        public UserTaskBase(string name, PriorityEnum priority, Action<Object> action)
+        public UserTaskBase(string name, TaskPriorities priority, Action<Object> action)
         {
             this.TaskId = Guid.NewGuid();
             this.Status = TaskStatus.Waiting;

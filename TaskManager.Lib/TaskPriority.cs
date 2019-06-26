@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TaskManager.Lib
 {
-    public enum PriorityEnum
+    public enum TaskPriorities
     {
         VeryLow,
         Low,
@@ -14,14 +14,14 @@ namespace TaskManager.Lib
         High,
         VeryHigh
     }
-    public static class TaskPriority
+    public static class TaskPriorityUtil
     {
-        public static IEnumerable<PriorityEnum> Values
+        public static IEnumerable<TaskPriorities> Values
         {
             get
             {
-                return Enum.GetValues(typeof(PriorityEnum))
-                    .Cast<PriorityEnum>()
+                return Enum.GetValues(typeof(TaskPriorities))
+                    .Cast<TaskPriorities>()
                     .OrderByDescending(pr => pr)
                     .ToList();
             }
